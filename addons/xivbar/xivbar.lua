@@ -35,7 +35,7 @@ addon.version = '1.0'
 config = require('settings');
 texts  = require('fonts')
 images = require('primitives')
-gStatusLib = require('status.status');
+gStatusHelpers = require('status.statushelpers');
 
 -- User settings
 local defaults = require('defaults')
@@ -154,7 +154,7 @@ end
 -- Bind Events
 -- ON LOAD
 ashita.events.register('load', 'load_cb', function ()
-    if gStatusLib.GetGameInterfaceHidden() == false then
+    if gStatusHelpers.GetGameInterfaceHidden() == false then
         initialize()
         show()
     end
@@ -202,10 +202,10 @@ end
 ashita.events.register('d3d_present', 'present_cb', function ()
 
     -- handle hiding bars
-    if xivbar.hide_bars == false and gStatusLib.GetGameInterfaceHidden() == true then
+    if xivbar.hide_bars == false and gStatusHelpers.GetGameInterfaceHidden() == true then
         xivbar.hide_bars = true
         hide()
-    elseif xivbar.hide_bars == true and gStatusLib.GetGameInterfaceHidden() == false then
+    elseif xivbar.hide_bars == true and gStatusHelpers.GetGameInterfaceHidden() == false then
         xivbar.hide_bars = false
         show()
     end
