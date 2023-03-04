@@ -1,6 +1,6 @@
-# xivbar
+# XIVBar [Ported by Tirem]
 
-***This addon was reworked and ported to Ashita v4 from Windower4 by Tirem***
+***This addon was reworked and ported to Ashita v4 from Windower4**
 
 This addon displays vital bars for easy tracking
 
