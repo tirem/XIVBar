@@ -1,4 +1,7 @@
 # xivbar
+
+***This addon was reworked and ported to Ashita v4 from Windower4 by Tirem***
+
 This addon displays vital bars for easy tracking
 
 ![alt text](http://i.imgur.com/QA6WSUY.png)
@@ -31,14 +34,13 @@ and you can use a compact version for a smaller resolution:
 
 ## How to edit the settings
 1. Login to your character in FFXI
-2. Edit the addon's settings file: **_Windower4\addons\xivbar\data\settings.xml_**
+2. Edit the addon's settings file: **[GameInstallLocation]\config\addons\xivbar\settings.lua**
 3. Save the file 
-4. Press Insert in FFXI to access the windower console 
-5. Type ``` lua r xivbar ``` to reload the addon
-6. Press Insert in FFXI again to close the windower console
+5. Type ``` /addon reload xivbar ``` to reload the addon
+6. *This method will soon be replaced by a config menu*
 
 ## How to create my own custom theme
-1. Create a folder inside the *theme* directory of the addon: **_Windower4\addons\xivbar\themes\MY_CUSTOM_THEME_**
+1. Create a folder inside the *theme* directory of the addon: **[GameInstallLocation]\addons\xivbar\themes\MY_CUSTOM_THEME**
 2. Create the necessary images. A theme is composed of 5 images: a background for the bars (*bar_bg.png*), a background for the compact mode (*bar_compact.png*), and one image for each bar (*hp_fg.png, mp_fg.png and tp_fg.png*). You can take a look at the default themes.
 3. Edit the name of the theme in the settings to yours. This setting must match the name of the folder you just created.
 4. Adjust the bar width, spacing and offset for your custom theme in the settings.
