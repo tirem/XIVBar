@@ -35,7 +35,6 @@ addon.version = '1.0'
 config = require('settings');
 texts  = require('fonts')
 images = require('primitives')
-gStatusHelpers = require('status.statushelpers');
 
 -- User settings
 local defaults = require('defaults')
@@ -47,6 +46,74 @@ config.register('settings', 'settings_update', function (s)
     end
 end);
 
+local bLoggedIn = false;
+local playerIndex = AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
+if playerIndex ~= 0 then
+    local entity = AshitaCore:GetMemoryManager():GetEntity();
+    local flags = entity:GetRenderFlags0(playerIndex);
+    if (bit.band(flags, 0x200) == 0x200) and (bit.band(flags, 0x4000) == 0) then
+        bLoggedIn = true;
+	end
+end
+
+--Thanks to Velyn for the event system and interface hidden signatures!
+local pGameMenu = ashita.memory.find('FFXiMain.dll', 0, "8B480C85C974??8B510885D274??3B05", 16, 0);
+local pEventSystem = ashita.memory.find('FFXiMain.dll', 0, "A0????????84C0741AA1????????85C0741166A1????????663B05????????0F94C0C3", 0, 0);
+local pInterfaceHidden = ashita.memory.find('FFXiMain.dll', 0, "8B4424046A016A0050B9????????E8????????F6D81BC040C3", 0, 0);
+
+local function GetMenuName()
+    local subPointer = ashita.memory.read_uint32(pGameMenu);
+    local subValue = ashita.memory.read_uint32(subPointer);
+    if (subValue == 0) then
+        return '';
+    end
+    local menuHeader = ashita.memory.read_uint32(subValue + 4);
+    local menuName = ashita.memory.read_string(menuHeader + 0x46, 16);
+    return string.gsub(tostring(menuName), '\x00', '');
+end
+
+local function GetEventSystemActive()
+    if (pEventSystem == 0) then
+        return false;
+    end
+    local ptr = ashita.memory.read_uint32(pEventSystem + 1);
+    if (ptr == 0) then
+        return false;
+    end
+
+    return (ashita.memory.read_uint8(ptr) == 1);
+
+end
+
+local function GetInterfaceHidden()
+    if (pEventSystem == 0) then
+        return false;
+    end
+    local ptr = ashita.memory.read_uint32(pInterfaceHidden + 10);
+    if (ptr == 0) then
+        return false;
+    end
+
+    return (ashita.memory.read_uint8(ptr + 0xB4) == 1);
+end
+
+
+local function GetGameInterfaceHidden()
+
+	if (GetEventSystemActive()) then
+		return true;
+	end
+	if (string.match(GetMenuName(), 'map')) then
+		return true;
+	end
+    if (GetInterfaceHidden()) then
+        return true;
+    end
+	if (bLoggedIn == false) then
+		return true;
+	end
+    return false;
+end
 
 -- Load theme options according to settings
 local theme = require('theme')
@@ -76,6 +143,31 @@ function initialize()
         xivbar.initialized = true
     end
 end
+
+local function GetHPTextColor()
+    local color = self.textColor
+    local barColor = nil
+    if self.barType == const.barTypeHp then
+        if val >= 0 then
+            if valPercent < 25 then
+                color = self.hpRedColor
+                barColor = self.hpRedBarColor
+            elseif valPercent < 50 then
+                color = self.hpOrangeColor
+                barColor = self.hpOrangeBarColor
+            elseif valPercent < 75 then
+                color = self.hpYellowColor
+                barColor = self.hpYellowBarColor
+            end
+        end
+    elseif self.barType == const.barTypeTp then
+        if val >= 1000 then
+            color = self.tpFullColor
+            barColor = self.tpFullBarColor
+        end
+    end    
+end
+
 
 -- update a bar
 function update_bar(bar, text, width, current, pp, flag)
@@ -122,10 +214,10 @@ function update_bar(bar, text, width, current, pp, flag)
         end
     end
 
-    if flag == 3 and current < 1000 then
-        text.color = tonumber(string.format('%02x%02x%02x%02x', theme_options.dim_tp_bar and 100 or 255, theme_options.full_tp_color_red, theme_options.full_tp_color_green, theme_options.full_tp_color_blue), 16);
+    if flag == 3 and current > 1000 then
+        text.color = tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.full_tp_color_red, theme_options.full_tp_color_green, theme_options.full_tp_color_blue), 16);
     else
-        text.color = tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue), 16);
+        text.color = tonumber(string.format('%02x%02x%02x%02x', (theme_options.dim_tp_bar and flag == 3 and 100) or 255, theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue), 16);
     end
 
     text:SetText(tostring(current))
@@ -154,7 +246,7 @@ end
 -- Bind Events
 -- ON LOAD
 ashita.events.register('load', 'load_cb', function ()
-    if gStatusHelpers.GetGameInterfaceHidden() == false then
+    if GetGameInterfaceHidden() == false then
         initialize()
         show()
     end
@@ -202,10 +294,10 @@ end
 ashita.events.register('d3d_present', 'present_cb', function ()
 
     -- handle hiding bars
-    if xivbar.hide_bars == false and gStatusHelpers.GetGameInterfaceHidden() == true then
+    if xivbar.hide_bars == false and GetGameInterfaceHidden() == true then
         xivbar.hide_bars = true
         hide()
-    elseif xivbar.hide_bars == true and gStatusHelpers.GetGameInterfaceHidden() == false then
+    elseif xivbar.hide_bars == true and GetGameInterfaceHidden() == false then
         xivbar.hide_bars = false
         show()
     end
@@ -228,3 +320,14 @@ ashita.events.register('d3d_present', 'present_cb', function ()
         update_bar(ui.tp_bar, ui.tp_text, xivbar.tp_bar_width, player.current_tp, player.tpp, 3)
     end
 end)
+
+-- The usual packet event doesn't register in libs but this __settings one does. Feels bad.
+ashita.events.register('packet_in', '__xivbar_packet_in_cb', function (e)
+    
+    -- Track our logged in status
+    if (e.id == 0x00A) then
+        bLoggedIn = true;
+	elseif (e.id == 0x00B) then
+        bLoggedIn = false;
+    end
+end);

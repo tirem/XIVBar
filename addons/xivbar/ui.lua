@@ -69,7 +69,7 @@ function setup_text(text, theme_options)
     text:SetFontHeight(theme_options.font_size)
     text.color = tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue), 16);
     text.draw_flags = 0x10;
-    text.color_outline = 0xFF000000
+    text.color_outline = tonumber(string.format('%02x%02x%02x%02x', theme_options.font_stroke_alpha, theme_options.font_color_red, theme_options.font_stroke_color_green, theme_options.font_stroke_color_blue), 16);
     text.visible = true;
 end
 
