@@ -46,8 +46,8 @@ defaults.Theme.Bar.Compact.Offset = 0
 defaults.Theme.DimTpBar = true
 
 defaults.Texts = {}
-defaults.Texts.Font = 'sans-serif'
-defaults.Texts.Size = 14
+defaults.Texts.Font = 'Grammara'
+defaults.Texts.Size = 16
 defaults.Texts.Offset = 0
 defaults.Texts.Color = {}
 defaults.Texts.Color.Alpha = 255

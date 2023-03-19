@@ -33,23 +33,8 @@ addon.version = '1.0'
 
 -- Libs
 config = require('settings');
-texts  = require('libs/gdifonts/include')
 images = require('libs/sprites')
-
--- User settings
-local defaults = require('defaults')
-local settings = config.load(defaults);
-
-local function UpdateSettings(s)
-    if (s ~= nil) then
-        settings = s;
-    end
-    settings.save();
-end
-
-config.register('settings', 'settings_update', function (s)
-    UpdateSettings(s);
-end);
+texts  = require('libs/gdifonts/include')
 
 local bLoggedIn = false;
 local playerIndex = AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
@@ -121,8 +106,26 @@ local function GetGameInterfaceHidden()
 end
 
 -- Load theme options according to settings
+-- User settings
+local defaults = require('defaults')
+local settings = config.load(defaults);
+local theme_options;
 local theme = require('theme')
-local theme_options = theme.apply(settings)
+
+local function UpdateSettings(s)
+    if (s ~= nil) then
+        settings = s;
+        theme_options = theme.apply(settings)
+        initialize();
+    end
+    settings.save();
+end
+
+config.register('settings', 'settings_update', function (s)
+    UpdateSettings(s);
+end);
+
+theme_options = theme.apply(settings)
 
 -- Addon Dependencies
 local ui = require('ui')
@@ -209,12 +212,12 @@ function update_bar(bar, text, width, current, pp, flag)
     end
 
     if flag == 3 and current > 1000 then
-        text.color = tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.full_tp_color_red, theme_options.full_tp_color_green, theme_options.full_tp_color_blue), 16);
+        text:set_font_color(tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.full_tp_color_red, theme_options.full_tp_color_green, theme_options.full_tp_color_blue), 16));
     else
-        text.color = tonumber(string.format('%02x%02x%02x%02x', (theme_options.dim_tp_bar and flag == 3 and 100) or 255, theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue), 16);
+        text:set_font_color(tonumber(string.format('%02x%02x%02x%02x', (theme_options.dim_tp_bar and flag == 3 and 100) or 255, theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue), 16));
     end
 
-    text:SetText(tostring(current))
+    text:set_text(tostring(current))
 end
 
 -- hide the addon
@@ -315,7 +318,6 @@ ashita.events.register('d3d_present', 'present_cb', function ()
     end
 end)
 
--- The usual packet event doesn't register in libs but this __settings one does. Feels bad.
 ashita.events.register('packet_in', '__xivbar_packet_in_cb', function (e)
     
     -- Track our logged in status

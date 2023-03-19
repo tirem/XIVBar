@@ -71,13 +71,6 @@ theme.apply = function (settings)
         options.bar_offset = settings.Theme.Bar.Compact.Offset
     end
 
-    if settings.Theme.Name == 'ffxiv' then
-        options.font_stroke_alpha = 150
-        options.font_stroke_color_red = 80
-        options.font_stroke_color_green = 70
-        options.font_stroke_color_blue = 30
-    end
-
     return options
 end
 

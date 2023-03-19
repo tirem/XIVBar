@@ -29,21 +29,12 @@
 
 local ui = {}
 
-
-
 -- setup images
 function setup_image(image, path)
-    image.texture = path
-    image.visible = true;
-    image.can_focus = false;
-    image.locked = true;
-    image.lockedz = true;
-    -- ui variables
-    ui.background = images:new(font_settings)
-
-    ui.hp_bar = images:new(font_settings)
-    ui.mp_bar = images:new(font_settings)
-    ui.tp_bar = images:new(font_settings)
+    if (image) then
+        image:SetPath(path);
+        image.visible = true;
+    end
 end
 
 -- setup text
@@ -53,26 +44,32 @@ function setup_text(text, theme_options)
         box_width = 0,
         font_alignment = texts.Alignment.Center;
         font_color = tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue), 16),
-        font_family = theme_options.font or 'Arial',
+        font_family = texts:get_font_available(theme_options.font) and theme_options.font or 'Arial',
         font_flags = texts.FontFlags.Bold,
-        font_height = theme_options.font_size,
+        font_height = theme_options.font_size ,
         gradient_color = 0x00000000,
         gradient_style = 0,
-        outline_color = tonumber(string.format('%02x%02x%02x%02x', theme_options.font_stroke_alpha, theme_options.font_color_red, theme_options.font_stroke_color_green, theme_options.font_stroke_color_blue), 16),
+
+        outline_color = tonumber(string.format('%02x%02x%02x%02x', theme_options.font_stroke_alpha, theme_options.font_stroke_color_red, theme_options.font_stroke_color_green, theme_options.font_stroke_color_blue), 16),
         outline_width = 3,
     
         position_x = 0,
         position_y = 0,
-        text = '',
+        text = text,
     };
 
-    ui.hp_text = texts:new(font_settings)
-    ui.mp_text = texts:new(font_settings)
-    ui.tp_text = texts:new(font_settings)
+    ui.hp_text = texts:create_object(font_settings, false);
+    ui.mp_text = texts:create_object(font_settings, false)
+    ui.tp_text = texts:create_object(font_settings, false)
 end
 
 -- load the images and text
 function ui:load(theme_options)
+    ui.background = images:new()
+    ui.hp_bar = images:new()
+    ui.mp_bar = images:new()
+    ui.tp_bar = images:new()
+
     setup_image(self.background, theme_options.bar_background)
     setup_image(self.hp_bar, theme_options.bar_hp)
     setup_image(self.mp_bar, theme_options.bar_mp)
@@ -99,34 +96,34 @@ function ui:position(theme_options)
     self.tp_bar.position_x = x + 35 + theme_options.bar_offset + (theme_options.bar_width*2) + (theme_options.bar_spacing*2)
     self.tp_bar.position_y = y + 2
 
-    self.hp_text.position_x = x + 65 + theme_options.text_offset
-    self.hp_text.position_y = self.background.position_y + 2
-    self.mp_text.position_x = x + 80 + theme_options.text_offset + theme_options.bar_width + theme_options.bar_spacing
-    self.mp_text.position_y = self.background.position_y + 2
-    self.tp_text.position_x = x + 90 + theme_options.text_offset + (theme_options.bar_width*2) + (theme_options.bar_spacing*2)
-    self.tp_text.position_y = self.background.position_y + 2
+    self.hp_text:set_position_x(x + 80 + theme_options.text_offset)
+    self.hp_text:set_position_y(self.background.position_y + 5)
+    self.mp_text:set_position_x(x + 95 + theme_options.text_offset + theme_options.bar_width + theme_options.bar_spacing)
+    self.mp_text:set_position_y(self.background.position_y + 5)
+    self.tp_text:set_position_x(x + 105 + theme_options.text_offset + (theme_options.bar_width*2) + (theme_options.bar_spacing*2))
+    self.tp_text:set_position_y(self.background.position_y + 5)
 end
 
 -- hide ui
 function ui:hide()
     self.background.visible = false
     self.hp_bar.visible = false
-    self.hp_text.visible = false
+    self.hp_text:set_visible(false);
     self.mp_bar.visible = false
-    self.mp_text.visible = false
+    self.mp_text:set_visible(false);
     self.tp_bar.visible = false
-    self.tp_text.visible = false
+    self.tp_text:set_visible(false);
 end
 
 -- show ui
 function ui:show()
     self.background.visible = true
     self.hp_bar.visible = true
-    self.hp_text.visible = true
+    self.hp_text:set_visible(true);
     self.mp_bar.visible = true
-    self.mp_text.visible = true
+    self.mp_text:set_visible(true);
     self.tp_bar.visible = true
-    self.tp_text.visible = true
+    self.tp_text:set_visible(true);
 end
 
 return ui
