@@ -51,7 +51,7 @@ function setup_text(text, theme_options)
         gradient_style = 0,
 
         outline_color = tonumber(string.format('%02x%02x%02x%02x', theme_options.font_stroke_alpha, theme_options.font_stroke_color_red, theme_options.font_stroke_color_green, theme_options.font_stroke_color_blue), 16),
-        outline_width = 3,
+        outline_width = theme_options.font_stroke_width,
     
         position_x = 0,
         position_y = 0,
@@ -61,6 +61,17 @@ function setup_text(text, theme_options)
     ui.hp_text = texts:create_object(font_settings, false);
     ui.mp_text = texts:create_object(font_settings, false)
     ui.tp_text = texts:create_object(font_settings, false)
+end
+
+function update_text(textObject, theme_options)
+    if (textObject == nil) then return; end
+
+    textObject:set_font_height(theme_options.font_size);
+    textObject:set_outline_width(theme_options.font_stroke_width);
+end
+
+function update_images(imageObject, theme_options)
+
 end
 
 -- load the images and text
@@ -79,6 +90,10 @@ function ui:load(theme_options)
     setup_text(self.tp_text, theme_options)
 
     self:position(theme_options)
+end
+
+function ui:reload(theme_option)
+
 end
 
 -- position the images and text

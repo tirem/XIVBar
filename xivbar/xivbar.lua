@@ -36,6 +36,8 @@ config = require('settings');
 images = require('libs/sprites')
 texts  = require('libs/gdifonts/include')
 
+local configMenu = require('config');
+
 local bLoggedIn = false;
 local playerIndex = AshitaCore:GetMemoryManager():GetParty():GetMemberTargetIndex(0);
 if playerIndex ~= 0 then
@@ -108,15 +110,21 @@ end
 -- Load theme options according to settings
 -- User settings
 local defaults = require('defaults')
-local settings = config.load(defaults);
+settings = config.load(defaults);
 local theme_options;
 local theme = require('theme')
 
-local function UpdateSettings(s)
+local xivbar = require('variables')
+
+function UpdateSettings(s)
     if (s ~= nil) then
         settings = s;
         theme_options = theme.apply(settings)
-        initialize();
+        if xivbar.initialized == true then
+            re_initialize();
+        else
+            initialize();
+        end
     end
     settings.save();
 end
@@ -130,10 +138,18 @@ theme_options = theme.apply(settings)
 -- Addon Dependencies
 local ui = require('ui')
 local player = require('player')
-local xivbar = require('variables')
+
 
 -- initialize addon
+function re_initialize()
+    if xivbar.initialized == true then
+        ui:reload(theme_options);
+    end
+end
+
 function initialize()
+    if xivbar.initialized == true then return; end
+
     ui:load(theme_options)
 
     local ashitaParty = AshitaCore:GetMemoryManager():GetParty();
@@ -228,9 +244,8 @@ end
 
 -- show the addon
 function show()
-    if xivbar.initialized == false then
-        initialize()
-    end
+
+    initialize()
 
     ui:show()
     xivbar.ready = true
@@ -244,7 +259,6 @@ end
 -- ON LOAD
 ashita.events.register('load', 'load_cb', function ()
     if GetGameInterfaceHidden() == false then
-        initialize()
         show()
     end
 end)

@@ -31,6 +31,7 @@ local defaults = {}
 defaults.Bars = {}
 defaults.Bars.OffsetX = 0
 defaults.Bars.OffsetY = 0
+defaults.Bars.Scale = 1
 
 defaults.Theme = {}
 defaults.Theme.Name = 'ffxiv'
