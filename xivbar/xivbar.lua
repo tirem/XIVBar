@@ -33,17 +33,22 @@ addon.version = '1.0'
 
 -- Libs
 config = require('settings');
-texts  = require('fonts')
-images = require('primitives')
+texts  = require('libs/gdifonts/include')
+images = require('libs/sprites')
 
 -- User settings
 local defaults = require('defaults')
 local settings = config.load(defaults);
 
-config.register('settings', 'settings_update', function (s)
+local function UpdateSettings(s)
     if (s ~= nil) then
-        config.save();
+        settings = s;
     end
+    settings.save();
+end
+
+config.register('settings', 'settings_update', function (s)
+    UpdateSettings(s);
 end);
 
 local bLoggedIn = false;
@@ -144,30 +149,19 @@ function initialize()
     end
 end
 
-local function GetHPTextColor()
-    local color = self.textColor
+local function GetHPTextColor(val)
+    local color = 0XFFFFFFFF
     local barColor = nil
-    if self.barType == const.barTypeHp then
         if val >= 0 then
-            if valPercent < 25 then
+            if val < 25 then
                 color = self.hpRedColor
-                barColor = self.hpRedBarColor
-            elseif valPercent < 50 then
+            elseif val < 50 then
                 color = self.hpOrangeColor
-                barColor = self.hpOrangeBarColor
-            elseif valPercent < 75 then
+            elseif val < 75 then
                 color = self.hpYellowColor
-                barColor = self.hpYellowBarColor
             end
         end
-    elseif self.barType == const.barTypeTp then
-        if val >= 1000 then
-            color = self.tpFullColor
-            barColor = self.tpFullBarColor
-        end
-    end    
 end
-
 
 -- update a bar
 function update_bar(bar, text, width, current, pp, flag)
@@ -331,3 +325,7 @@ ashita.events.register('packet_in', '__xivbar_packet_in_cb', function (e)
         bLoggedIn = false;
     end
 end);
+
+ashita.events.register('unload', '__xivbar_unload_cb', function ()
+    texts:destroy_interface();
+end)

@@ -29,30 +29,7 @@
 
 local ui = {}
 
-local text_setup = {
-    locked = true,
-    draw_flags = 0x10,
-    background = 
-    T{
-        visible = false,
-    },
-    right_justified = true,
-}
 
-local images_setup = {
-    locked = true,
-}
-
--- ui variables
-ui.background = images:new(images_setup)
-
-ui.hp_bar = images:new(images_setup)
-ui.mp_bar = images:new(images_setup)
-ui.tp_bar = images:new(images_setup)
-
-ui.hp_text = texts:new(text_setup)
-ui.mp_text = texts:new(text_setup)
-ui.tp_text = texts:new(text_setup)
 
 -- setup images
 function setup_image(image, path)
@@ -61,16 +38,37 @@ function setup_image(image, path)
     image.can_focus = false;
     image.locked = true;
     image.lockedz = true;
+    -- ui variables
+    ui.background = images:new(font_settings)
+
+    ui.hp_bar = images:new(font_settings)
+    ui.mp_bar = images:new(font_settings)
+    ui.tp_bar = images:new(font_settings)
 end
 
 -- setup text
 function setup_text(text, theme_options)
-    text.font = theme_options.font
-    text:SetFontHeight(theme_options.font_size)
-    text.color = tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue), 16);
-    text.draw_flags = 0x10;
-    text.color_outline = tonumber(string.format('%02x%02x%02x%02x', theme_options.font_stroke_alpha, theme_options.font_color_red, theme_options.font_stroke_color_green, theme_options.font_stroke_color_blue), 16);
-    text.visible = true;
+    local font_settings = {
+        box_height = 0,
+        box_width = 0,
+        font_alignment = texts.Alignment.Center;
+        font_color = tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue), 16),
+        font_family = theme_options.font or 'Arial',
+        font_flags = texts.FontFlags.Bold,
+        font_height = theme_options.font_size,
+        gradient_color = 0x00000000,
+        gradient_style = 0,
+        outline_color = tonumber(string.format('%02x%02x%02x%02x', theme_options.font_stroke_alpha, theme_options.font_color_red, theme_options.font_stroke_color_green, theme_options.font_stroke_color_blue), 16),
+        outline_width = 3,
+    
+        position_x = 0,
+        position_y = 0,
+        text = '',
+    };
+
+    ui.hp_text = texts:new(font_settings)
+    ui.mp_text = texts:new(font_settings)
+    ui.tp_text = texts:new(font_settings)
 end
 
 -- load the images and text
