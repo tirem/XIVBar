@@ -1,0 +1,3 @@
+[submodule "xivbar/libs/gdifonts"]
+	path = xivbar/libs/gdifonts
+	url = https://github.com/ThornyFFXI/gdifonts
