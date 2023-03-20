@@ -32,7 +32,7 @@ addon.author = ' Tirem (Rework) Edeon (Original)'
 addon.version = '1.0'
 
 -- Libs
-config = require('settings');
+local settingsLib = require('settings');
 images = require('libs/sprites')
 texts  = require('libs/gdifonts/include')
 
@@ -110,7 +110,7 @@ end
 -- Load theme options according to settings
 -- User settings
 local defaults = require('defaults')
-settings = config.load(defaults);
+settings = settingsLib.load(defaults);
 local theme_options;
 local theme = require('theme')
 
@@ -119,17 +119,17 @@ local xivbar = require('variables')
 function UpdateSettings(s)
     if (s ~= nil) then
         settings = s;
-        theme_options = theme.apply(settings)
-        if xivbar.initialized == true then
-            re_initialize();
-        else
-            initialize();
-        end
     end
-    settings.save();
+    theme_options = theme.apply(settings)
+    if xivbar.initialized == true then
+        re_initialize();
+    else
+        initialize();
+    end
+    settingsLib.save();
 end
 
-config.register('settings', 'settings_update', function (s)
+settingsLib.register('settings', 'settings_update', function (s)
     UpdateSettings(s);
 end);
 
@@ -144,6 +144,12 @@ local player = require('player')
 function re_initialize()
     if xivbar.initialized == true then
         ui:reload(theme_options);
+        xivbar.hp_bar_width = 0
+        xivbar.mp_bar_width = 0
+        xivbar.tp_bar_width = 0
+        xivbar.update_hp = true
+        xivbar.update_tp = true
+        xivbar.update_mp = true
     end
 end
 
@@ -169,21 +175,21 @@ function initialize()
 end
 
 local function GetHPTextColor(val)
-    local color = 0XFFFFFFFF
-    local barColor = nil
-        if val >= 0 then
-            if val < 25 then
-                color = self.hpRedColor
-            elseif val < 50 then
-                color = self.hpOrangeColor
-            elseif val < 75 then
-                color = self.hpYellowColor
-            end
+    local color = { theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue }
+    if val >= 0 then
+        if val < 25 then
+            color = { theme_options.critical_hp_color_red, theme_options.critical_hp_color_green, theme_options.critical_hp_color_blue }
+        elseif val < 50 then
+            color = { theme_options.low_hp_color_red, theme_options.low_hp_color_green, theme_options.low_hp_color_blue }
+        elseif val < 75 then
+            color = { theme_options.mid_hp_color_red, theme_options.mid_hp_color_green, theme_options.mid_hp_color_blue }
         end
+    end
+    return color;
 end
 
 -- update a bar
-function update_bar(bar, text, width, current, pp, flag)
+local function update_bar(bar, text, width, current, pp, flag)
     local old_width = width
     local new_width = math.floor((pp / 100) * theme_options.bar_width)
 
@@ -227,8 +233,12 @@ function update_bar(bar, text, width, current, pp, flag)
         end
     end
 
+    -- figure out colors
     if flag == 3 and current > 1000 then
         text:set_font_color(tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.full_tp_color_red, theme_options.full_tp_color_green, theme_options.full_tp_color_blue), 16));
+    elseif (flag == 1 and theme_options.use_hp_colors) then
+        local color = GetHPTextColor(player.hpp)
+        text:set_font_color(tonumber(string.format('%02x%02x%02x%02x', 255, color[1], color[2], color[3]), 16))
     else
         text:set_font_color(tonumber(string.format('%02x%02x%02x%02x', (theme_options.dim_tp_bar and flag == 3 and 100) or 255, theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue), 16));
     end
@@ -237,13 +247,13 @@ function update_bar(bar, text, width, current, pp, flag)
 end
 
 -- hide the addon
-function hide()
+local function hide()
     ui:hide()
     xivbar.ready = false
 end
 
 -- show the addon
-function show()
+local function show()
 
     initialize()
 
@@ -265,9 +275,8 @@ end)
 
 local function CheckVitals()
     local ashitaParty = AshitaCore:GetMemoryManager():GetParty();
-    local ashitaPlayer = AshitaCore:GetMemoryManager():GetPlayer();
 	
-    if ashitaPlayer ~= nil and ashitaParty ~= nil then
+    if ashitaParty ~= nil then
 
         local currentHpp = math.clamp(ashitaParty:GetMemberHPPercent(0), 0, 100);
         if (player.hpp ~= currentHpp) then

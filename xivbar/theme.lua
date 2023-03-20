@@ -43,18 +43,33 @@ theme.apply = function (settings)
 
     options.font = settings.Texts.Font
     options.font_size = settings.Texts.Size
-    options.font_alpha = settings.Texts.Color.Alpha
     options.font_color_red = settings.Texts.Color.Red
     options.font_color_green = settings.Texts.Color.Green
     options.font_color_blue = settings.Texts.Color.Blue
     options.font_stroke_width = settings.Texts.Stroke.Width
-    options.font_stroke_alpha = settings.Texts.Stroke.Alpha
     options.font_stroke_color_red = settings.Texts.Stroke.Red
     options.font_stroke_color_green = settings.Texts.Stroke.Green
     options.font_stroke_color_blue = settings.Texts.Stroke.Blue
     options.full_tp_color_red = settings.Texts.FullTpColor.Red
     options.full_tp_color_green = settings.Texts.FullTpColor.Green
     options.full_tp_color_blue = settings.Texts.FullTpColor.Blue
+
+    options.full_tp_color_red = settings.Texts.FullTpColor.Red
+    options.full_tp_color_green = settings.Texts.FullTpColor.Green
+    options.full_tp_color_blue = settings.Texts.FullTpColor.Blue
+
+    options.mid_hp_color_red = settings.Texts.HpMid.Red
+    options.mid_hp_color_green = settings.Texts.HpMid.Green
+    options.mid_hp_color_blue = settings.Texts.HpMid.Blue
+
+    options.low_hp_color_red = settings.Texts.HpLow.Red
+    options.low_hp_color_green = settings.Texts.HpLow.Green
+    options.low_hp_color_blue = settings.Texts.HpLow.Blue
+
+    options.critical_hp_color_red = settings.Texts.HpCritical.Red
+    options.critical_hp_color_green = settings.Texts.HpCritical.Green
+    options.critical_hp_color_blue = settings.Texts.HpCritical.Blue
+
     options.text_offset = settings.Texts.Offset
 
     options.bar_width = settings.Theme.Bar.Width
@@ -62,6 +77,7 @@ theme.apply = function (settings)
     options.bar_offset = settings.Theme.Bar.Offset
 
     options.dim_tp_bar = settings.Theme.DimTpBar
+    options.use_hp_colors = settings.Theme.ColorHpText
 
     if settings.Theme.Compact then
         options.bar_background = addon.path .. 'themes/' .. settings.Theme.Name .. '/bar_compact.png'

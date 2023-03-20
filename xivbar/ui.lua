@@ -38,7 +38,7 @@ function setup_image(image, path)
 end
 
 -- setup text
-function setup_text(text, theme_options)
+local function get_text_settings(theme_options)
     local font_settings = {
         box_height = 0,
         box_width = 0,
@@ -46,21 +46,18 @@ function setup_text(text, theme_options)
         font_color = tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue), 16),
         font_family = texts:get_font_available(theme_options.font) and theme_options.font or 'Arial',
         font_flags = texts.FontFlags.Bold,
-        font_height = theme_options.font_size ,
+        font_height = theme_options.font_size,
         gradient_color = 0x00000000,
         gradient_style = 0,
 
-        outline_color = tonumber(string.format('%02x%02x%02x%02x', theme_options.font_stroke_alpha, theme_options.font_stroke_color_red, theme_options.font_stroke_color_green, theme_options.font_stroke_color_blue), 16),
+        outline_color = tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.font_stroke_color_red, theme_options.font_stroke_color_green, theme_options.font_stroke_color_blue), 16),
         outline_width = theme_options.font_stroke_width,
     
         position_x = 0,
         position_y = 0,
-        text = text,
+        text = '',
     };
-
-    ui.hp_text = texts:create_object(font_settings, false);
-    ui.mp_text = texts:create_object(font_settings, false)
-    ui.tp_text = texts:create_object(font_settings, false)
+    return font_settings;
 end
 
 function update_text(textObject, theme_options)
@@ -68,10 +65,9 @@ function update_text(textObject, theme_options)
 
     textObject:set_font_height(theme_options.font_size);
     textObject:set_outline_width(theme_options.font_stroke_width);
-end
-
-function update_images(imageObject, theme_options)
-
+    textObject:set_font_color(tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue), 16))
+    textObject:set_font_family(texts:get_font_available(theme_options.font) and theme_options.font or 'Arial');
+    textObject:set_outline_color(tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.font_stroke_color_red, theme_options.font_stroke_color_green, theme_options.font_stroke_color_blue), 16))
 end
 
 -- load the images and text
@@ -85,15 +81,25 @@ function ui:load(theme_options)
     setup_image(self.hp_bar, theme_options.bar_hp)
     setup_image(self.mp_bar, theme_options.bar_mp)
     setup_image(self.tp_bar, theme_options.bar_tp)
-    setup_text(self.hp_text, theme_options)
-    setup_text(self.mp_text, theme_options)
-    setup_text(self.tp_text, theme_options)
+
+    local textSettings = get_text_settings(theme_options);
+    ui.hp_text = texts:create_object(textSettings, false);
+    ui.mp_text = texts:create_object(textSettings, false)
+    ui.tp_text = texts:create_object(textSettings, false)
 
     self:position(theme_options)
 end
 
-function ui:reload(theme_option)
+function ui:reload(theme_options)
+    setup_image(self.background, theme_options.bar_background)
+    setup_image(self.hp_bar, theme_options.bar_hp)
+    setup_image(self.mp_bar, theme_options.bar_mp)
+    setup_image(self.tp_bar, theme_options.bar_tp)
+    update_text(self.hp_text, theme_options)
+    update_text(self.mp_text, theme_options)
+    update_text(self.tp_text, theme_options)
 
+    ui:position(theme_options);
 end
 
 -- position the images and text
