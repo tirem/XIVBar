@@ -127,6 +127,7 @@ end
 
 -- hide ui
 function ui:hide()
+    if (self.background == nil) then return; end;
     self.background.visible = false
     self.hp_bar.visible = false
     self.hp_text:set_visible(false);
@@ -138,6 +139,7 @@ end
 
 -- show ui
 function ui:show()
+    if (self.background == nil) then return; end;
     self.background.visible = true
     self.hp_bar.visible = true
     self.hp_text:set_visible(true);

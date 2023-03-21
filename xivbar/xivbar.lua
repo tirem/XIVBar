@@ -111,29 +111,11 @@ end
 -- User settings
 local defaults = require('defaults')
 settings = settingsLib.load(defaults);
-local theme_options;
 local theme = require('theme')
 
 local xivbar = require('variables')
 
-function UpdateSettings(s)
-    if (s ~= nil) then
-        settings = s;
-    end
-    theme_options = theme.apply(settings)
-    if xivbar.initialized == true then
-        re_initialize();
-    else
-        initialize();
-    end
-    settingsLib.save();
-end
-
-settingsLib.register('settings', 'settings_update', function (s)
-    UpdateSettings(s);
-end);
-
-theme_options = theme.apply(settings)
+gTheme_options = theme.apply(settings)
 
 -- Addon Dependencies
 local ui = require('ui')
@@ -141,9 +123,10 @@ local player = require('player')
 
 
 -- initialize addon
-function re_initialize()
+local function re_initialize()
     if xivbar.initialized == true then
-        ui:reload(theme_options);
+        gTheme_options = theme.apply(settings)
+        ui:reload(gTheme_options);
         xivbar.hp_bar_width = 0
         xivbar.mp_bar_width = 0
         xivbar.tp_bar_width = 0
@@ -153,10 +136,10 @@ function re_initialize()
     end
 end
 
-function initialize()
+local function initialize()
     if xivbar.initialized == true then return; end
-
-    ui:load(theme_options)
+    gTheme_options = theme.apply(settings)
+    ui:load(gTheme_options)
 
     local ashitaParty = AshitaCore:GetMemoryManager():GetParty();
     local ashitaPlayer = AshitaCore:GetMemoryManager():GetPlayer();
@@ -174,15 +157,35 @@ function initialize()
     end
 end
 
+function OnSettingsUpdated()
+    if xivbar.initialized == true then
+        re_initialize();
+    else
+        initialize();
+    end
+end
+
+function UpdateSettings(s)
+    if (s ~= nil) then
+        settings = s;
+    end
+    OnSettingsUpdated();
+    settingsLib.save();
+end
+
+settingsLib.register('settings', 'settings_update', function (s)
+    UpdateSettings(s);
+end);
+
 local function GetHPTextColor(val)
-    local color = { theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue }
+    local color = { gTheme_options.font_color_red, gTheme_options.font_color_green, gTheme_options.font_color_blue }
     if val >= 0 then
         if val < 25 then
-            color = { theme_options.critical_hp_color_red, theme_options.critical_hp_color_green, theme_options.critical_hp_color_blue }
+            color = { gTheme_options.critical_hp_color_red, gTheme_options.critical_hp_color_green, gTheme_options.critical_hp_color_blue }
         elseif val < 50 then
-            color = { theme_options.low_hp_color_red, theme_options.low_hp_color_green, theme_options.low_hp_color_blue }
+            color = { gTheme_options.low_hp_color_red, gTheme_options.low_hp_color_green, gTheme_options.low_hp_color_blue }
         elseif val < 75 then
-            color = { theme_options.mid_hp_color_red, theme_options.mid_hp_color_green, theme_options.mid_hp_color_blue }
+            color = { gTheme_options.mid_hp_color_red, gTheme_options.mid_hp_color_green, gTheme_options.mid_hp_color_blue }
         end
     end
     return color;
@@ -191,7 +194,7 @@ end
 -- update a bar
 local function update_bar(bar, text, width, current, pp, flag)
     local old_width = width
-    local new_width = math.floor((pp / 100) * theme_options.bar_width)
+    local new_width = math.floor((pp / 100) * gTheme_options.bar_width)
 
     if new_width ~= nil and new_width >= 0 then
         if old_width == new_width then
@@ -212,7 +215,7 @@ local function update_bar(bar, text, width, current, pp, flag)
             if old_width < new_width then
                 x = old_width + math.ceil((new_width - old_width) * 0.1)
 
-                x = math.min(x, theme_options.bar_width)
+                x = math.min(x, gTheme_options.bar_width)
             elseif old_width > new_width then
                 x = old_width - math.ceil((old_width - new_width) * 0.1)
 
@@ -228,19 +231,19 @@ local function update_bar(bar, text, width, current, pp, flag)
             end
 
             bar.width = x;
-            bar.height = theme_options.total_height;
+            bar.height = gTheme_options.total_height;
             bar.visible = true;
         end
     end
 
     -- figure out colors
     if flag == 3 and current > 1000 then
-        text:set_font_color(tonumber(string.format('%02x%02x%02x%02x', 255, theme_options.full_tp_color_red, theme_options.full_tp_color_green, theme_options.full_tp_color_blue), 16));
-    elseif (flag == 1 and theme_options.use_hp_colors) then
+        text:set_font_color(tonumber(string.format('%02x%02x%02x%02x', 255, gTheme_options.full_tp_color_red, gTheme_options.full_tp_color_green, gTheme_options.full_tp_color_blue), 16));
+    elseif (flag == 1 and gTheme_options.use_hp_colors) then
         local color = GetHPTextColor(player.hpp)
         text:set_font_color(tonumber(string.format('%02x%02x%02x%02x', 255, color[1], color[2], color[3]), 16))
     else
-        text:set_font_color(tonumber(string.format('%02x%02x%02x%02x', (theme_options.dim_tp_bar and flag == 3 and 100) or 255, theme_options.font_color_red, theme_options.font_color_green, theme_options.font_color_blue), 16));
+        text:set_font_color(tonumber(string.format('%02x%02x%02x%02x', (gTheme_options.dim_tp_bar and flag == 3 and 100) or 255, gTheme_options.font_color_red, gTheme_options.font_color_green, gTheme_options.font_color_blue), 16));
     end
 
     text:set_text(tostring(current))
@@ -272,6 +275,7 @@ ashita.events.register('load', 'load_cb', function ()
         show()
     end
 end)
+
 
 local function CheckVitals()
     local ashitaParty = AshitaCore:GetMemoryManager():GetParty();
@@ -351,6 +355,6 @@ ashita.events.register('packet_in', '__xivbar_packet_in_cb', function (e)
     end
 end);
 
-ashita.events.register('unload', '__xivbar_unload_cb', function ()
+ashita.events.register('unload', 'load_cb', function ()
     texts:destroy_interface();
 end)

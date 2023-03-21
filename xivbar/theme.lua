@@ -87,6 +87,9 @@ theme.apply = function (settings)
         options.bar_offset = settings.Theme.Bar.Compact.Offset
     end
 
+    options.screen_x = AshitaCore:GetConfigurationManager():GetFloat('boot', 'ffxi.registry', '0001', 1024) / 2 - (options.total_width / 2)
+    options.screen_y = AshitaCore:GetConfigurationManager():GetFloat('boot', 'ffxi.registry', '0002', 768) - 60
+
     return options
 end
 
